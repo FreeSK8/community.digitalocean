@@ -49,6 +49,11 @@ options:
       - Prefix of generated varible names (e.g. 'tags' -> 'do_tags')
     type: str
     default: 'do'
+  deploy_environment:
+    description:
+      - Name of the DO tag to filter this hosting environment with
+    type: str
+    default: 'dev'
 '''
 
 EXAMPLES = r'''
@@ -166,12 +171,13 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         # get options and process the payload
         attributes = self.get_option('attributes')
         var_prefix = self.get_option('var_prefix')
+        deploy_environment = self.get_option('deploy_environment')
         strict = self.get_option('strict')
 
         for record in payload['droplets']:
 
             # add host to inventory
-            if record['name']:
+            if record['name'] and deploy_environment in record['tags']:
                 host_name = self.inventory.add_host(record['name'])
             else:
                 continue
